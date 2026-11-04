@@ -2,6 +2,7 @@
 # Banking Transaction QA Toolkit
 # Checks expected transactions against processed transactions.
 
+import argparse
 from datetime import datetime
 from pathlib import Path
 import csv
@@ -155,14 +156,32 @@ def reconcile(expected, processed):
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Compare expected and processed banking transactions."
+    )
+
+    parser.add_argument(
+        "--expected",
+        default="input_transactions.csv",
+        help="CSV file containing expected transactions"
+    )
+
+    parser.add_argument(
+        "--processed",
+        default="processed_transactions.csv",
+        help="CSV file containing processed transactions"
+    )
+
+    args = parser.parse_args()
+
     try:
         expected = read_transactions(
-            "input_transactions.csv",
+            args.expected,
             ["transaction_id", "amount", "expected_status"]
         )
 
         processed = read_transactions(
-            "processed_transactions.csv",
+            args.processed,
             ["transaction_id", "amount", "status"]
         )
 
