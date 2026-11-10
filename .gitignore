@@ -3,3 +3,4 @@ __pycache__/
 *.pyc
 .vscode/
 pytest-report.xml
+banking_qa.db
