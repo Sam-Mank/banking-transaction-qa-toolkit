@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fictional Transaction Demo</title>
+</head>
+<body>
+  <main>
+    <h1>Fictional Transaction Demo</h1>
+    <p>This local demo uses synthetic data and does not save transactions.</p>
+
+    <form id="transaction-form">
+      <label for="transaction-id">Transaction ID</label>
+      <input id="transaction-id" name="transaction-id" required>
+
+      <label for="amount">Amount</label>
+      <input id="amount" name="amount" type="number" min="0.01" step="0.01" required>
+
+      <label for="account">Account</label>
+      <select id="account" name="account">
+        <option value="active">ACC-DEMO-001 (active)</option>
+        <option value="inactive">ACC-DEMO-002 (inactive)</option>
+      </select>
+
+      <button type="submit">Validate transaction</button>
+    </form>
+
+    <p id="result" role="status" aria-live="polite"></p>
+  </main>
+
+  <script>
+    const form = document.querySelector("#transaction-form");
+    const result = document.querySelector("#result");
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const transactionId = document.querySelector("#transaction-id").value.trim();
+      const amount = Number(document.querySelector("#amount").value);
+      const account = document.querySelector("#account").value;
+
+      if (!transactionId) {
+        result.textContent = "Enter a transaction ID.";
+      } else if (!Number.isFinite(amount) || amount <= 0) {
+        result.textContent = "Amount must be greater than zero.";
+      } else if (amount > 5000) {
+        result.textContent = "Amount exceeds the demo limit of 5000.";
+      } else if (account !== "active") {
+        result.textContent = "The selected demo account is inactive.";
+      } else {
+        result.textContent =
+          `Demo transaction ${transactionId} approved for £${amount.toFixed(2)}. No transaction was saved.`;
+      }
+    });
+  </script>
+</body>
+</html>
