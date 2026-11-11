@@ -1,0 +1,51 @@
+name: Banking QA Toolkit CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Create fresh training database
+        run: python database_setup.py
+
+      - name: Run database and reconciliation tests
+        run: python -m pytest -q test_database.py test_reconcile.py
+
+      - name: Start local banking API
+        run: |
+          python -c "from banking_api import app; app.run(host='127.0.0.1', port=5000, debug=False)" > /tmp/banking-api.log 2>&1 &
+          for attempt in {1..30}; do
+            if python -c "import socket; socket.create_connection(('127.0.0.1', 5000), timeout=1).close()" 2>/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/banking-api.log
+          echo "Banking API did not start in time"
+          exit 1
+
+      - name: Run banking API tests
+        run: python -m pytest -q test_banking_api.py
+
