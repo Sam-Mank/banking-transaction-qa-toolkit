@@ -1,0 +1,49 @@
+$kind: http-request
+description: ""
+url: https://jsonplaceholder.typicode.com/posts/1
+method: GET
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"API returns status code 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response contains a transaction post ID\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.id).to.eql(1);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response contains a title\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.title).to.not.be.empty;\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response contains a user ID\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.userId).to.eql(1);\r
+
+      });"
+    language: text/javascript
+order: 1000

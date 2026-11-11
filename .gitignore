@@ -4,3 +4,7 @@ __pycache__/
 .vscode/
 pytest-report.xml
 banking_qa.db
+*.db
+.*.xml#
+.postman/
+*.sqbpro

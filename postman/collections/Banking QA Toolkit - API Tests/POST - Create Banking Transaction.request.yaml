@@ -1,0 +1,84 @@
+$kind: http-request
+description: ""
+url: https://jsonplaceholder.typicode.com/posts
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"title\": \"Banking transaction\",\r
+
+    \    \"body\": \"Payment of 125.50 GBP\",\r
+
+    \    \"userId\": 1\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.test(\"API returns 201 Created\", function () {\r
+
+      \    pm.response.to.have.status(201);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response contains a generated ID\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.id).to.exist;\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Title matches submitted data\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.title).to.eql(\"Banking transaction\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Payment description is correct\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.body).to.eql(\"Payment of 125.50 GBP\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"User ID is correct\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.userId).to.eql(1);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Negative payment amount is rejected\", function () {\r
+
+      \    const response = pm.response.json();\r
+
+      \r
+
+      \    pm.expect(response.body).to.not.include(\"-125.50\");\r
+
+      });"
+    language: text/javascript
+order: 2000

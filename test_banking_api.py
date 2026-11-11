@@ -1,31 +1,35 @@
 
-import requests
 import sqlite3
 import pytest
 
-BASE_URL = "http://127.0.0.1:5000"
+from config.settings import DATABASE_NAME
+from config.api_client import create_transaction
+
 
 @pytest.fixture(autouse=True)
 def clean_test_transactions():
 
-    connection = sqlite3.connect("banking_qa.db")
+    connection = sqlite3.connect(DATABASE_NAME)
 
-    test_ids = (
-        "TXN3001",
-        "TXN3002",
-        "TXN3003",
-        "TXN3004"
-    )
+    try:
+        test_ids = (
+            "TXN3001",
+            "TXN3002",
+            "TXN3003",
+            "TXN3004"
+        )
 
-    placeholders = ",".join("?" for _ in test_ids)
+        placeholders = ",".join("?" for _ in test_ids)
 
-    connection.execute(
-        f"DELETE FROM transactions WHERE transaction_id IN ({placeholders})",
-        test_ids
-    )
+        connection.execute(
+            f"DELETE FROM transactions WHERE transaction_id IN ({placeholders})",
+            test_ids
+        )
 
-    connection.commit()
-    connection.close()
+        connection.commit()
+
+    finally:
+        connection.close()
 
 
 def test_create_transaction_successfully():
@@ -36,11 +40,7 @@ def test_create_transaction_successfully():
         "account_reference": "ACC2002"
     }
 
-    response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    response = create_transaction(payload)
 
     assert response.status_code == 201
     assert response.json()["transaction_id"] == "TXN3002"
@@ -56,20 +56,12 @@ def test_duplicate_transaction_is_rejected():
     }
 
     # First submission should succeed
-    first_response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    first_response = create_transaction(payload)
 
     assert first_response.status_code == 201
 
     # Second submission should be rejected
-    second_response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    second_response = create_transaction(payload)
 
     assert second_response.status_code == 409
     assert second_response.json()["error"] == "Duplicate transaction ID"
@@ -84,11 +76,7 @@ def test_negative_transaction_amount_is_rejected():
         "account_reference": "ACC2003"
     }
 
-    response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    response = create_transaction(payload)
 
     assert response.status_code == 400
     assert response.json()["error"] == "Amount must be positive"
@@ -101,11 +89,7 @@ def test_missing_transaction_id_is_rejected():
         "account_reference": "ACC2004"
     }
 
-    response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    response = create_transaction(payload)
 
     assert response.status_code == 400
     assert response.json()["error"] == "Missing field: transaction_id"
@@ -119,11 +103,7 @@ def test_invalid_amount_format_is_rejected():
         "account_reference": "ACC2005"
     }
 
-    response = requests.post(
-        f"{BASE_URL}/transactions",
-        json=payload,
-        timeout=10
-    )
+    response = create_transaction(payload)
 
     assert response.status_code == 400
     assert response.json()["error"] == "Invalid amount"

@@ -2,9 +2,11 @@
 from flask import Flask, request, jsonify
 import sqlite3
 
+from config.settings import DATABASE_NAME
+
 app = Flask(__name__)
 
-DATABASE = "banking_qa.db"
+DATABASE = DATABASE_NAME
 
 
 def save_transaction(transaction_id, amount, status, account_reference):
