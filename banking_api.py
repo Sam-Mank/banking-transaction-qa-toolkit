@@ -8,6 +8,32 @@ app = Flask(__name__)
 
 DATABASE = DATABASE_NAME
 
+# Fictional account test data
+ACCOUNT_STATUSES = {
+    "ACC4001": "ACTIVE",
+    "ACC4002": "INACTIVE",
+    "ACC4003": "ACTIVE",
+    "ACC4004": "ACTIVE",
+    "ACC4005": "ACTIVE",
+    "ACC4006": "ACTIVE",
+    "ACC4007": "ACTIVE",
+    "ACC4008": "INACTIVE",
+    "ACC2001": "ACTIVE",
+    "ACC2002": "ACTIVE"
+}
+# Fictional account balances
+ACCOUNT_BALANCES = {
+    "ACC4001": 1000.00,
+    "ACC4002": 1000.00,
+    "ACC4003": 1000.00,
+    "ACC4004": 10000.00,
+    "ACC4005": 10000.00,
+    "ACC4006": 1000.00,
+    "ACC4007": 1000.00,
+    "ACC4008": 1000.00,
+    "ACC2001": 1000.00,
+    "ACC2002": 1000.00
+}
 
 def save_transaction(transaction_id, amount, status, account_reference):
 
@@ -53,6 +79,24 @@ def create_transaction():
 
     if amount <= 0:
         return jsonify({"error": "Amount must be positive"}), 400
+
+    if amount > 5000:
+        return jsonify({"error": "Amount exceeds maximum limit"}), 400
+    
+    account_reference = data["account_reference"]
+
+    account_status = ACCOUNT_STATUSES.get(account_reference)
+
+    if account_status != "ACTIVE":
+        return jsonify({"error": "Account is inactive"}), 400
+    
+    available_balance = ACCOUNT_BALANCES.get(account_reference)
+
+    if available_balance is None:
+        return jsonify({"error": "Account balance not found"}), 400
+
+    if amount > available_balance:
+        return jsonify({"error": "Insufficient funds"}), 400
 
     try:
         save_transaction(
